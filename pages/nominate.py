@@ -70,7 +70,7 @@ def main():
         st.rerun()
 
 def reset():
-    '''Resets the value for current nominees'''
+    '''Resets the value for current nominees and vote status'''
     sheet = connection()
     sheet.resetNominees()
 

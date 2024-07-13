@@ -5,8 +5,9 @@ Purpose: Add a book to the database.
 import streamlit as st
 from rank import connection
 import polars as pl
-import bookSummary
+# import bookSummary
 import datetime
+from classes import bookSummary
 
 def main():
     # Look up book info
@@ -14,7 +15,8 @@ def main():
     if title == '':
         return
     
-    info = bookSummary.get_book_info(title)
+    b = bookSummary()
+    info = b.get_book_info(title)
 
     # Check that we got a result...
     if info == 'No books found for the given title.':
@@ -37,36 +39,42 @@ def main():
         st.session_state['numBooks'] = 0
 
         for book in info:
+            # Display the book information
+            b.apiDisplayBookInfo(book, info[book])
+
             # Make a button to select this book
-            st.button(f'Select {book}', key = f'addBook_{st.session_state['numBooks']}', on_click = addNewBook(info))
+            st.button(f'Select {book}', key = f'addBook_{st.session_state['numBooks']}', on_click = addNewBook(b, info))
+            st.markdown('---')
 
-            # Make a heading for the book we're looking at
-            st.write(f"# {book}")
+            # # Make a heading for the book we're looking at
+            # st.write(f"# {book}")
 
-            # Get the image, if there is one
-            image = info[book].pop('image')
+            # # Get the image, if there is one
+            # image = info[book].pop('image')
 
-            # If we got a picture, display it
-            if image:
-                st.image(image)
+            # # If we got a picture, display it
+            # if image:
+            #     st.image(image)
 
-            # Show the book information
-            st.write(info[book])
+            # # Show the book information
+            # st.write(info[book])
 
-            # Add the image info back
-            info[book]['image'] = image
+            # # Add the image info back
+            # info[book]['image'] = image
 
             # Increment
             st.session_state['numBooks'] += 1
 
-def addNewBook(info):
+def addNewBook(b, info):
     '''Adds the given book information to the database'''
     for n in range(st.session_state['numBooks']):
         item = f'addBook_{n}'
         if st.session_state[item]:
             # Figure out which book it was
             keys = list(info.keys())
-            checkBook(info[keys[n]], keys[n])
+            b.writeBookInfo(keys[n], info[keys[n]])
+            
+            # checkBook(info[keys[n]], keys[n])
 
             # Reset the key so we don't do this again
             st.session_state[item] = False
