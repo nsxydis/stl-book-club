@@ -14,8 +14,6 @@ try:
     from key import apiKey, apiFile
 except:
     apiKey = st.secrets['apiKey']
-    # TEMP
-    st.write(apiKey)
     json = str(st.secrets['json']).replace("'", '"')
 
 def main():
@@ -412,6 +410,8 @@ class bookSummary:
     
     def __init__(self):
         self.apiKey = apiKey
+        # TEMP
+        st.write(self.apiKey)
         self.sheet = connection()
         self.bookSheet()
 
