@@ -26,24 +26,29 @@ def main():
     # Get the current nominees
     current = v.currentElection()
 
-    # Display the current results
-    if v.checkVote():
-        # Pull the data
-        df = pl.from_pandas(
-            v.voteSheet.get_as_df()
-        )
+    try:
+        # Display the current results
+        if v.checkVote():
+            # Pull the data
+            df = pl.from_pandas(
+                v.voteSheet.get_as_df()
+            )
 
-        # Filter for the votes casted today
-        df = df.filter(
-            pl.col('vote_date') == v.user.date
-        )
+            # Filter for the votes casted today
+            df = df.filter(
+                pl.col('vote_date') == v.user.date
+            )
 
-        # Rank choice voting
-        rankChoice(df)
+            # Rank choice voting
+            rankChoice(df)
 
-        # Stop the page generation
+            # Stop the page generation
+            return
+
+    except:
+        st.write("Start an election first!")
         return
-
+    
     # Create an option for each book to vote on
     options = [item + 1 for item in range(len(current))]
 
