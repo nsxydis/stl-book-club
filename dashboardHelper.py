@@ -14,6 +14,8 @@ try:
     from key import apiKey, apiFile
 except:
     apiKey = st.secrets['apiKey']
+    # TEMP
+    st.write(apiKey)
     json = str(st.secrets['json']).replace("'", '"')
 
 def main():
