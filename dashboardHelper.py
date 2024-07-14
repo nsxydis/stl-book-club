@@ -151,6 +151,9 @@ class cookie:
             self.cookieID = cookies['ajs_anonymous_id']
         except:
             self.cookieID = None
+            # TEMP
+            st.write('# Cookie')
+            st.write(cookies)
 
         if self.cookieID:        
             # Write to the cookie log
