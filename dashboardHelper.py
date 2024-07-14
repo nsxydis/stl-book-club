@@ -145,13 +145,16 @@ class cookie:
         # Get all cookies
         cookies = controller.getAll()
 
+        # TEMP
+        st.write(cookies)
+
         # If the user doesn't have a cookie...
         userID = controller.get('user_cookie')
         if userID:
             self.cookieID = userID
         else:
             # Set a cookie
-            userID = len(self.workSheet.get_as_df())
+            userID = str(len(self.workSheet.get_as_df()))
             controller.set('user_cookie', userID)
             self.cookieID = userID
 
