@@ -410,8 +410,6 @@ class bookSummary:
     
     def __init__(self):
         self.apiKey = apiKey
-        # TEMP
-        st.write(self.apiKey)
         self.sheet = connection()
         self.bookSheet()
 
@@ -427,6 +425,9 @@ class bookSummary:
 
         # Make the request to the API
         response = requests.get(endpoint, params=params)
+
+        # TEMP
+        st.write(response.json())
 
         # Check if the request was successful
         if response.status_code == 200:
