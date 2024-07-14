@@ -38,6 +38,9 @@ def main():
         st.session_state['b'] = b
         st.session_state['info'] = info
 
+        # TEMP
+        st.write(info)
+
         for book in info:
             # Display the book information
             b.apiDisplayBookInfo(book, info[book])
