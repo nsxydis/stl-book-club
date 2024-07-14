@@ -151,7 +151,7 @@ class cookie:
         # Check that the userID is in the database, if not, clear it's value
         if userID:
             df = pl.from_pandas(self.workSheet.get_as_df())
-            if len(df.filter(pl.col('cookieID') == userID)) == 0:
+            if len(df.filter(pl.col('cookie') == userID)) == 0:
                 userID = None
 
         if userID:
