@@ -2,3 +2,4 @@ polars
 altair
 pygsheets
 streamlit_cookies_controller
+st_pages

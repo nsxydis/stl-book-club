@@ -8,6 +8,7 @@ Date: 01Jul2024
 
 import streamlit as st
 import polars as pl
+import datetime
 
 # Dashboard helper
 import dashboardHelper as h
@@ -112,11 +113,49 @@ def reset():
 
 def startElection():
     '''Starts an election with the current nominees as the candidates'''
-    # Shorthand
+    # Shorthand to get the current nominees
     current = st.session_state['currentNominees']
 
-    # TEMP
-    print(current)
+    # Today's date
+    today = datetime.datetime.today()
+    today = today.strftime('%d%b%Y')
+
+    # Make a temporary dataframe
+    temp = current.with_columns(
+        pl.col('book').map_elements(lambda x: today, return_dtype = pl.Utf8).alias('election_date')
+    )
+    temp = temp[['book', 'election_date']]
+
+    # Current sheet
+    sheet = st.session_state['sheet']
+
+    # Get the election sheet number
+    n = 0
+    while True:
+        name = sheet.sh[n].title
+        if name == 'Election':
+            break
+
+        # Increment
+        n += 1
+
+    # Store the election sheet
+    election = sheet.sh[n]
+
+    # Read in the current data
+    df = pl.from_pandas(election.get_as_df())
+
+    # Add the new data
+    df = pl.concat([df, temp], how = 'diagonal_relaxed')
+
+    # Write the data back
+    election.set_dataframe(df.to_pandas(), (1, 1))
+
+    # If success... party time
+    st.snow()
+
+    # Reset the current nominees
+    reset()
 
 if __name__ == '__main__':
     h.initAll()

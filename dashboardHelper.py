@@ -2,6 +2,7 @@
 Purpose: Helpful functions and classes for the dashboard.
 '''
 import streamlit as st
+import st_pages
 from streamlit_cookies_controller import CookieController
 import polars as pl
 import datetime
@@ -48,6 +49,14 @@ def init(name, value):
 
 def initAll():
     '''Initializes all key values for the session state'''
+    # Set up the page names
+    st_pages.show_pages(
+        [
+            st_pages.Page('rank.py', 'Homepage'),
+            st_pages.Page('pages/addBook.py', 'Search for new books'),
+            st_pages.Page('pages/nominate.py', 'Nominate books')
+        ]
+    )
     # Store the google sheet in the session state
     init('sheet', connection())
 
