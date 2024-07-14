@@ -66,6 +66,3 @@ def addNewBook():
 if __name__ == '__main__':
     initAll()
     main()
-    
-    # Remove excess data from the session state
-    if 'info' in st.session_state: st.session_state.pop('info')

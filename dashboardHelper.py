@@ -59,8 +59,6 @@ def initAll():
     )
     # Store the google sheet in the session state
     init('sheet', connection())
-    init('info', None)
-    init('b', None)
 
 @st.cache_resource(ttl = 3600)
 def connection():
