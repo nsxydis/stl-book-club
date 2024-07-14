@@ -60,7 +60,7 @@ def initAll():
     # Store the google sheet in the session state
     init('sheet', connection())
 
-@st.cache_resource(ttl = 3600)
+@st.cache_data(ttl = 3600)
 def connection():
     '''Establish the connection and return the sheet'''
     try:
