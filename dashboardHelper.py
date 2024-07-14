@@ -13,7 +13,7 @@ try:
     from key import apiKey, apiFile
 except:
     apiKey = st.secrets['apiKey']
-    json = str(st.secrets['json'])
+    json = str(st.secrets['json']).replace("'", '"')
 
 def main():
     pass
