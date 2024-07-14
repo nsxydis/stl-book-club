@@ -415,12 +415,13 @@ class bookSummary:
 
     def get_book_info(self, title):
         # Define the endpoint
-        endpoint = "https://www.googleapis.com/books/v1/volumes&country=US"
+        endpoint = "https://www.googleapis.com/books/v1/volumes"
 
         # Set up the parameters
         params = {
             'q': title,  # Query with the book title
             'key': apiKey,  # Replace with your Google Books API key
+            'country'   : 'US'
         }
 
         # Make the request to the API
