@@ -12,7 +12,7 @@ import dashboardHelper as h     # Helper for the dashboard
 
 def main():
     '''Launch a streamlit page to track and vote on books for book club'''
-    current = getNominees()
+    # current = getNominees()
 
     # Check if the user has voted already
     v = h.vote()
@@ -22,6 +22,9 @@ def main():
         _ = v.name
     except:
         return
+    
+    # Get the current nominees
+    current = v.currentElection()
 
     # Display the current results
     if v.checkVote():

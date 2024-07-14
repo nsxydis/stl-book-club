@@ -157,6 +157,19 @@ def startElection():
     # Reset the current nominees
     reset()
 
+    # Reset users vote status
+    n = 0
+    while True:
+        name = sheet.sh[n].title
+        if name == 'User Log':
+            break
+        n += 1
+    df = pl.from_pandas(sheet.sh[n].get_as_df())
+    df = df.with_columns(
+        pl.col('voted').map_elements(lambda x: False, return_dtype = pl.Boolean)
+    )
+    sheet.sh[n].set_dataframe(df.to_pandas(), (1, 1))
+
 if __name__ == '__main__':
     h.initAll()
     main()

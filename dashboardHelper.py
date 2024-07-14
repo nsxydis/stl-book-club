@@ -376,9 +376,12 @@ class vote:
             self.user.workSheet.get_as_df()
         )
 
+        # Convert the voted status to an integer
+        df = df.with_columns(pl.col('voted').replace({'FALSE' : 0, 'TRUE' : 1}).cast(pl.Int64))
+
         # Get the vote status for the user's name
         voteStatus = df.filter(
-            pl.col('cookie') == self.name
+            pl.col('name') == self.name
         )['voted'].sum()
 
         # If anyone with the user's name has voted, that counts as this user having voted
@@ -386,6 +389,21 @@ class vote:
 
         # Return the boolean
         return voteStatus
+
+    def currentElection(self):
+        '''Gets the current nominees for the current or previous election'''
+        sheet = self.electionSheet
+        df = pl.from_pandas(sheet.get_as_df())
+
+        # Convert the date string to a datetime
+        df = df.with_columns(
+            pl.col('election_date').str.to_datetime('%d%b%Y')
+        )
+
+        # Get and return the most recent election_date data
+        latestDate = df['election_date'].max()
+        recent = df.filter(pl.col('election_date') == latestDate)
+        return recent
 
 class bookSummary:
     '''Pulls and writes the book summaries'''
