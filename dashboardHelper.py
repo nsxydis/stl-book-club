@@ -158,8 +158,8 @@ class cookie:
             self.cookieID = userID
         else:
             # Set a cookie
-            userID = str(len(self.workSheet.get_as_df()))
-            controller.set('user_cookie', 'user_' + userID)
+            userID = 'user_' + str(len(self.workSheet.get_as_df()))
+            controller.set('user_cookie', userID)
             self.cookieID = userID
 
         if self.cookieID:        
