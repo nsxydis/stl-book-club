@@ -147,7 +147,13 @@ class cookie:
 
         # If the user doesn't have a cookie...
         userID = str(controller.get('user_cookie'))
-        if 'user_' not in userID: userID = 'user_' + userID
+
+        # Check that the userID is in the database, if not, clear it's value
+        if userID:
+            df = pl.from_pandas(self.workSheet.get_as_df())
+            if len(df.filter(pl.col('cookieID') == userID)) == 0:
+                userID = None
+
         if userID:
             self.cookieID = userID
         else:
@@ -155,15 +161,6 @@ class cookie:
             userID = str(len(self.workSheet.get_as_df()))
             controller.set('user_cookie', 'user_' + userID)
             self.cookieID = userID
-
-        # try:
-        #     # Set the cookie ID for this user
-        #     self.cookieID = cookies['user_cookie']
-        # except:
-        #     self.cookieID = None
-        #     # TEMP
-        #     st.write('# Cookie')
-        #     st.write(cookies)
 
         if self.cookieID:        
             # Write to the cookie log
