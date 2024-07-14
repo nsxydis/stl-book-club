@@ -415,7 +415,7 @@ class bookSummary:
 
     def get_book_info(self, title):
         # Define the endpoint
-        endpoint = "https://www.googleapis.com/books/v1/volumes"
+        endpoint = "https://www.googleapis.com/books/v1/volumes&country=US"
 
         # Set up the parameters
         params = {
