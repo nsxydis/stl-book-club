@@ -5,9 +5,15 @@ import streamlit as st
 from streamlit_cookies_controller import CookieController
 import polars as pl
 import datetime
-from key import apiKey
 import requests
 import pygsheets
+
+# Import options
+try:
+    from key import apiKey, apiFile
+except:
+    apiKey = st.secrets['apiKey']
+    json = st.secrets['json']
 
 def main():
     pass
@@ -48,22 +54,28 @@ def initAll():
 @st.cache_resource(ttl = 3600)
 def connection():
     '''Establish the connection and return the sheet'''
-    # JSON file with the sheet connection details
-    file = r'glassy-mystery-427419-e0-a8061269c27e.json'
-    
-    # Create the connection
-    sheet = sheets(file)
+    try:
+        # JSON file with the sheet connection details
+        file = apiFile
+        
+        # Create the connection
+        sheet = sheets(file)
+    except:
+        sheet = sheets(json = json)
 
     return sheet
 
 class sheets:
     '''Class to read and write from the Book Club spreadsheet'''
 
-    def __init__(self, jsonFile):
+    def __init__(self, jsonFile: 'str' = None, json: 'str' = None):
         '''Establish Connection'''
 
         # Set up the sheets connection
-        self.gc = pygsheets.authorize(service_file = jsonFile)
+        if jsonFile:
+            self.gc = pygsheets.authorize(service_file = jsonFile)
+        elif json:
+            self.gc = pygsheets.authorize(service_account_json = json)
 
         # Connect to the Book Club Database
         self.sh = self.gc.open('Book Club Database')
