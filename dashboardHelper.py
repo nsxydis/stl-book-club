@@ -62,8 +62,8 @@ def connection():
         sheet = sheets(file)
     except:
         # TEMP
-        print(json)
-        
+        st.write(json)
+
         sheet = sheets(json = json)
 
     return sheet
