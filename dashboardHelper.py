@@ -149,7 +149,7 @@ class cookie:
         st.write(cookies)
 
         # If the user doesn't have a cookie...
-        userID = controller.get('user_cookie')
+        userID = str(controller.get('user_cookie'))
         if userID:
             self.cookieID = userID
         else:
