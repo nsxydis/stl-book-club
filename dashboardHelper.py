@@ -61,9 +61,7 @@ def connection():
         # Create the connection
         sheet = sheets(file)
     except:
-        # TEMP
-        st.write(json)
-
+        # If we're running on the cloud, use the secrets instead
         sheet = sheets(json = json)
 
     return sheet
