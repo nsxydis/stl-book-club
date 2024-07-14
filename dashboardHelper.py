@@ -427,9 +427,6 @@ class bookSummary:
         # Make the request to the API
         response = requests.get(endpoint, params=params)
 
-        # TEMP
-        st.write(response.json())
-
         # Check if the request was successful
         if response.status_code == 200:
             data = response.json()
