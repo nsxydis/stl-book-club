@@ -137,23 +137,32 @@ class cookie:
         # Save the workSheet for the Cookie Log
         self.workSheet = self.sheet.sh[self.sheetNum]
 
+        # Get the length of the User Log
+
         # Set up the cookie for this user
         controller = CookieController()
-
-        # Set a cookie
-        controller.set('cookie_name', 'testing')
 
         # Get all cookies
         cookies = controller.getAll()
 
-        try:
-            # Set the cookie ID for this user
-            self.cookieID = cookies['ajs_anonymous_id']
-        except:
-            self.cookieID = None
-            # TEMP
-            st.write('# Cookie')
-            st.write(cookies)
+        # If the user doesn't have a cookie...
+        userID = controller.get('user_cookie')
+        if userID:
+            self.cookieID = userID
+        else:
+            # Set a cookie
+            userID = len(self.workSheet.get_as_df())
+            controller.set('user_cookie', userID)
+            self.cookieID = userID
+
+        # try:
+        #     # Set the cookie ID for this user
+        #     self.cookieID = cookies['user_cookie']
+        # except:
+        #     self.cookieID = None
+        #     # TEMP
+        #     st.write('# Cookie')
+        #     st.write(cookies)
 
         if self.cookieID:        
             # Write to the cookie log
