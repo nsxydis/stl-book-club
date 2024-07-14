@@ -1,11 +1,13 @@
+'''
+Purpose: Helpful functions and classes for the dashboard.
+'''
 import streamlit as st
 from streamlit_cookies_controller import CookieController
 import polars as pl
-from rank import connection
 import datetime
 from key import apiKey
 import requests
-
+import pygsheets
 
 def main():
     pass
@@ -28,6 +30,72 @@ def cookie_main():
     # Display the current info
     df = pl.from_pandas(user.workSheet.get_as_df())
     st.dataframe(df)
+
+# Shorthand
+ss = st.session_state
+
+def init(name, value):
+    '''Checks if the given name is in the session state.
+    If not, adds the specified value'''
+    if name not in ss:
+        ss[name] = value
+
+def initAll():
+    '''Initializes all key values for the session state'''
+    # Store the google sheet in the session state
+    init('sheet', connection())
+
+@st.cache_resource(ttl = 3600)
+def connection():
+    '''Establish the connection and return the sheet'''
+    # JSON file with the sheet connection details
+    file = r'glassy-mystery-427419-e0-a8061269c27e.json'
+    
+    # Create the connection
+    sheet = sheets(file)
+
+    return sheet
+
+class sheets:
+    '''Class to read and write from the Book Club spreadsheet'''
+
+    def __init__(self, jsonFile):
+        '''Establish Connection'''
+
+        # Set up the sheets connection
+        self.gc = pygsheets.authorize(service_file = jsonFile)
+
+        # Connect to the Book Club Database
+        self.sh = self.gc.open('Book Club Database')
+
+    def getBooks(self):
+        '''Reads the current list of nominees from the database'''
+        # Find the "Suggested Books" sheet
+        n = 0
+        while True:
+            if self.sh[n].title == 'Suggested Books':
+                break
+            n += 1
+
+        # Read in the sheet and convert to dataframe
+        df = pl.from_pandas(self.sh[n].get_as_df())
+
+        # Return the dataframe
+        return df, n
+
+    def resetNominees(self):
+        '''Resets the nominee field to be false for all books'''
+        # Read in the current dataframe
+        df, n = self.getBooks()
+
+        # Reset all 'nominated' fields to False
+        df = df.with_columns(pl.col('nominated').map_elements(lambda x: False, return_dtype = pl.Boolean))
+
+        # Rewrite the data on the sheet
+        self.sh[n].set_dataframe(df.to_pandas(), (1,1))
+
+    def votingPage(self):
+        '''Creates a streamlit page to vote on books'''
 
 class cookie:
     '''Cookie Class to store and update user info'''

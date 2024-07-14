@@ -2,18 +2,20 @@
 Purpose: Implement a rank choice voting scheme.
 '''
 
+# Standard modules
 import streamlit as st
 import polars as pl
-import pygsheets
-import classes
 import altair as alt
+
+# Custom Modules
+import dashboardHelper as h     # Helper for the dashboard
 
 def main():
     '''Launch a streamlit page to track and vote on books for book club'''
     current = getNominees()
 
     # Check if the user has voted already
-    v = classes.vote()
+    v = h.vote()
 
     # Basic check to see if we should continue
     try:
@@ -77,7 +79,7 @@ def main():
 def getNominees():
     '''Get the nominees'''
     # Establish connection
-    sheet = connection()
+    sheet = st.session_state['sheet']
 
     # Read the current nominees
     df, sheetNum = sheet.getBooks()
@@ -92,17 +94,6 @@ def getNominees():
     )
 
     return current
-
-@st.cache_resource(ttl = 3600)
-def connection():
-    '''Establish the connection and return the sheet'''
-    # JSON file with the sheet connection details
-    file = r'glassy-mystery-427419-e0-a8061269c27e.json'
-    
-    # Create the connection
-    sheet = sheets(file)
-
-    return sheet
 
 def rankChoice(df, round = 1, scale = None):
     '''Run the ranked choice algorithm'''
@@ -253,47 +244,7 @@ def string_to_int_custom(s):
     for char in s:
         num = num * 100 + char_to_num[char]  # Use a base large enough to avoid collisions
     return num
-
-class sheets:
-    '''Class to read and write from the Book Club spreadsheet'''
-
-    def __init__(self, jsonFile):
-        '''Establish Connection'''
-
-        # Set up the sheets connection
-        self.gc = pygsheets.authorize(service_file = jsonFile)
-
-        # Connect to the Book Club Database
-        self.sh = self.gc.open('Book Club Database')
-
-    def getBooks(self):
-        '''Reads the current list of nominees from the database'''
-        # Find the "Suggested Books" sheet
-        n = 0
-        while True:
-            if self.sh[n].title == 'Suggested Books':
-                break
-            n += 1
-
-        # Read in the sheet and convert to dataframe
-        df = pl.from_pandas(self.sh[n].get_as_df())
-
-        # Return the dataframe
-        return df, n
-
-    def resetNominees(self):
-        '''Resets the nominee field to be false for all books'''
-        # Read in the current dataframe
-        df, n = self.getBooks()
-
-        # Reset all 'nominated' fields to False
-        df = df.with_columns(pl.col('nominated').map_elements(lambda x: False, return_dtype = pl.Boolean))
-
-        # Rewrite the data on the sheet
-        self.sh[n].set_dataframe(df.to_pandas(), (1,1))
-
-    def votingPage(self):
-        '''Creates a streamlit page to vote on books'''
         
 if __name__ == '__main__':
+    h.initAll()
     main()
