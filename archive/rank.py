@@ -1,106 +1,108 @@
 '''
-Purpose: Simple voting app to implement ranked choice voting.
+Purpose: Implement a rank choice voting scheme.
 '''
 
+# Standard modules
 import streamlit as st
 import polars as pl
 import altair as alt
 
+# Custom Modules
+import dashboardHelper as h     # Helper for the dashboard
+
 def main():
-    # Init books
-    books, votes = init()
+    '''Launch a streamlit page to track and vote on books for book club'''
+    # current = getNominees()
 
-    # Add a book -- removing whitespace
-    book = st.text_input("Add book").strip()
-    books = addBook(book, books)
+    # Check if the user has voted already
+    v = h.vote()
 
-    # Get the number of books, and thus number of categories
-    n_books = len(books)
-
-    # currentVote init
-    currentVote = {}
-
-    # Voting form
-    with st.form('Voting Page'):
-        # Display the current list of books
-        for book in books:
-            col1, col2, col3 = st.columns(3)
-            
-            # Display the book we're voting on
-            with col1:
-                st.write(book)
-
-            # Voting categories
-            with col2:
-                currentVote[book] = st.number_input(f'{book} Rank', min_value = 0, max_value = n_books)
-
-        vote = st.form_submit_button("Submit Vote!")
-
-    # Check the vote meets our criteria
-    if vote:
-        values = []
-        for key, value in currentVote.items():
-            if value > 0:
-                if value not in values:
-                    values.append(value)
-                else:
-                    st.error("One or more of your votes have the same ranking")
-                    return
-
-        # If all is good, update the vote status
-        st.session_state['voted'] = True
-        st.write("User Vote")
-        st.write(currentVote)
-        votes.append(currentVote)
-
-    # Display the current number of votes
-    st.write(f"# Number of Votes: {len(votes)}")
-
-    # Convert the votes to a dataframe
-    data = {
-        'name'  : [],
-        'book'  : [],
-        'rank'  : []
-    }
-
-    n = 0
-    for vote in votes:
-        n += 1
-        user = f'user_{n}'
-        for  key, value in vote.items():
-            # Skip 0 votes
-            if value == 0:
-                continue
-            data['name'].append(user)
-            data['book'].append(key)
-            data['rank'].append(value)
-
-    df = pl.DataFrame(data)
-
-    # If we don't have data, don't score
-    if len(df) == 0:
+    # Basic check to see if we should continue
+    try:
+        _ = v.name
+    except:
         return
     
-    # Otherwise run the voting algo
-    rankChoice(df)
+    # Get the current nominees
+    current = v.currentElection()
 
+    try:
+        # Display the current results
+        if v.checkVote():
+            # Pull the data
+            df = pl.from_pandas(
+                v.voteSheet.get_as_df()
+            )
 
-@st.cache_resource()
-def init():
-    '''Initializes global variables'''
-    books = []
-    votes = []
-    return books, votes
+            # Filter for the votes casted today
+            df = df.filter(
+                pl.col('vote_date') == v.user.date
+            )
 
-@st.cache_resource()
-def addBook(book, books):
-    '''Adds the given book to a global cached value'''
-    if book and book not in books:
-        books.append(book)
+            # Rank choice voting
+            rankChoice(df)
 
-    return books
+            # Stop the page generation
+            return
 
-### Copied functions
+    except:
+        st.write("Start an election first!")
+        return
+    
+    # Create an option for each book to vote on
+    options = [item + 1 for item in range(len(current))]
+
+    # Add an option to not vote for something
+    options.append('N/A')
+
+    # Voting form
+    with st.form('rankChoice'):
+        userVote = {}
+        # List out all of the book options
+        for n in range(len(current)):
+            book = current['book'][n]
+            userVote[book] = st.selectbox(book, options = options)
+
+        st.form_submit_button('Vote!')
+    
+    # Check that the votes were cast correctly
+    cast = []
+    for item in userVote:
+        result = userVote[item]
+        if result not in cast:
+            try: 
+                cast.append(int(result))
+            except:
+                pass
+        else: 
+            st.error("You have multiple books with the same ranking!")
+            return
+        
+    # Save the vote
+    v.vote(userVote)
+
+    # Refresh the page
+    st.rerun()
+
+def getNominees():
+    '''Get the nominees'''
+    # Establish connection
+    sheet = st.session_state['sheet']
+
+    # Read the current nominees
+    df, sheetNum = sheet.getBooks()
+
+    # Get the list of current nominees
+    current = df.filter(
+        # We want to see books that are currently nominated
+        pl.col('nominated') == 'TRUE',
+
+        # We don't want books that are currently nominated
+        pl.col('victorious') == ''
+    )
+
+    return current
+
 def rankChoice(df, round = 1, scale = None):
     '''Run the ranked choice algorithm'''
     # Keep track of the rounds
@@ -182,7 +184,7 @@ def rankChoice(df, round = 1, scale = None):
     if top > .5:
         highest = r.filter(pl.col('votes') == r['votes'].max())
         st.write("# The winning book is:")
-        st.write(f"## {highest['book'][0]}!!!")
+        st.write(f'## {highest['book'][0]}!!!')
     
     else:
         # Endless loop catch
@@ -213,7 +215,7 @@ def rankChoice(df, round = 1, scale = None):
             # If we have a winner now...
             if len(highest) == 1:
                 st.write('# The winning book is:')
-                st.write(f"## {highest['book'][0]}!")
+                st.write(f'## {highest['book'][0]}!')
                 return
             
             # If there still isn't a winner, randomly select between the options
@@ -250,6 +252,7 @@ def string_to_int_custom(s):
     for char in s:
         num = num * 100 + char_to_num[char]  # Use a base large enough to avoid collisions
     return num
-
+        
 if __name__ == '__main__':
+    h.initAll()
     main()
