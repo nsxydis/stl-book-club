@@ -6,10 +6,15 @@ import streamlit as st
 import polars as pl
 import altair as alt
 
-# Defaults
-st.session_state['debug'] = False
-
 def main():
+    # Defaults
+    if 'debug' not in st.session_state:
+        st.session_state['debug'] = False
+
+    # Session State printout
+    if st.session_state['debug']:
+        st.write(st.session_state)
+    
     # Init books
     books, votes = init()
 
@@ -70,7 +75,7 @@ def main():
     
     # Debug: Check the current books list and what's been added or removed
     if st.session_state['debug']:
-        st.write("TEMP")
+        st.write("Current book list and add/remove entries")
         st.write(books)
         st.write(f'Added book: {book}')
         st.write(f'Removed book: {remove}')
@@ -121,9 +126,81 @@ def main():
 
         # If all is good, update the vote status
         st.session_state['voted'] = True
+        st.session_state['user vote'] = currentVote
         st.write("## Your Vote:")
         st.write(currentVote)
         votes.append(currentVote)
+
+    # If the user made a mistake...
+    if 'voted' not in st.session_state:
+        st.session_state['voted'] = False
+
+    if st.session_state['voted'] == True:
+        # Add a button to undo the current vote
+        st.write("Does something look wrong? Do you need to undo your vote?")
+        st.button("Oops -- remove my vote", key = 'oops')
+
+        # If the user presses the oops button
+        if st.session_state['oops']:
+            # Try to remove the vote
+            try:
+                n = votes.index(st.session_state['user vote'])
+                votes.pop(n)
+                st.session_state['voted'] = False
+                st.session_state['user vote'] = None
+                st.rerun()
+            
+            # Or report a message that it was not able to be removed
+            except:
+                st.error("Your vote could not be undone...")
+
+    # Init admin mode
+    if 'admin' not in st.session_state:
+        st.session_state['admin'] = False
+        
+    # Button to turn on admin mode
+    admin = st.button("Data correction mode", help = 'Mistakes have been made -- honor is on the line!')
+    if admin:
+        st.session_state['admin'] = True
+        st.session_state['debug'] = True
+        st.rerun()
+    
+    # Button to turn off admin mode
+    if st.session_state['admin']:
+        admin_off = st.button("Disable correction mode", help = "All is right with the world. Well this data world at least.")
+        if admin_off:
+            st.session_state['admin'] = False
+            st.session_state['debug'] = False
+            st.rerun()
+
+    # If we're in admin mode, display all the votes and add an option to remove it
+    if st.session_state['admin']:
+        st.info("With great power, comes great responsibility")
+
+        # Display a gif from a file
+        import os
+        path = os.path.join(os.getcwd(), 'desperate-thor.gif')
+        st.image(path)
+
+        # Display a gif from a web link
+        # src = 'https://media1.tenor.com/m/YtysEhir3u0AAAAC/desperate-thor.gif'
+        # st.markdown(f'<img src={src}/>', unsafe_allow_html=True)
+        
+        st.write("# All Votes")
+        st.write(votes)
+        n = len(votes)
+
+        # Remove a vote
+        with st.form('remove vote'):
+            errantVote = st.selectbox("Remove vote", options = range(n))
+            removeVote = st.form_submit_button("Remove it!")
+
+        if removeVote:
+            votes.pop(errantVote)
+            st.rerun()
+
+
+
 
     # Display the current number of votes
     st.write(f"# Number of Votes: {len(votes)}")
