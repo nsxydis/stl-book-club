@@ -6,6 +6,9 @@ import streamlit as st
 import polars as pl
 import altair as alt
 
+# Defaults
+st.session_state['debug'] = False
+
 def main():
     # Init books
     books, votes = init()
@@ -18,16 +21,59 @@ def main():
         if refresh:
             st.rerun()
 
-    with col2:
+    with col2:          
+        # Add a button to clear the cache
         clear = st.button("Reset Books & Votes")
         if clear:
+            # Set the default confirmation response to False
+            if 'yes' in st.session_state:
+                st.session_state['yes'] = False
+            st.warning("Are you sure?")
+            st.button("Heck yes", key = 'yes')
+            st.button("No")
+
+        # If we have an answer and the answer for yes == True, reset the cache
+        if 'yes' in st.session_state and st.session_state['yes'] == True:
             # Clear cache
             st.cache_resource.clear()
             st.rerun()
 
+    # Set the value of book equal to the input data
+    if 'book' in st.session_state:
+        book = st.session_state['book'].strip()
+        st.session_state['book'] = ''
+    else:
+        book = ''
+
     # Add a book -- removing whitespace
-    book = st.text_input("Add a book to the voting arena").strip()
-    books = addBook(book, books)
+    st.text_input("Add a book to the voting arena", key = 'book').strip()
+    if book:
+        # Add the result if it's not in our data already
+        if book not in books:
+            books.append(book)
+            st.success(f"Added book: {book}")
+
+    # Set the value of the remove book if there was input data
+    if 'remove' in st.session_state:
+        remove = st.session_state['remove'].strip()
+        st.session_state['remove'] = ''
+    else:
+        remove = ''
+    
+    # Remove a book -- removing whitespace
+    st.text_input("Remove a book from the voting arena", key = 'remove')
+    if remove:
+        # Remove the book if it's in our data
+        if remove in books:
+            books.remove(remove)
+            st.warning(f"Removed book: {remove}")
+    
+    # Debug: Check the current books list and what's been added or removed
+    if st.session_state['debug']:
+        st.write("TEMP")
+        st.write(books)
+        st.write(f'Added book: {book}')
+        st.write(f'Removed book: {remove}')
 
     # Get the number of books, and thus number of categories
     n_books = len(books)
@@ -119,14 +165,6 @@ def init():
     books = []
     votes = []
     return books, votes
-
-@st.cache_resource()
-def addBook(book, books):
-    '''Adds the given book to a global cached value'''
-    if book and book not in books:
-        books.append(book)
-
-    return books
 
 ### Copied functions
 def rankChoice(df, round = 1, scale = None):
