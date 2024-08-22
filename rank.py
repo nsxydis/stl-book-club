@@ -26,7 +26,7 @@ def main():
             st.rerun()
 
     # Add a book -- removing whitespace
-    book = st.text_input("Add book").strip()
+    book = st.text_input("Add a book to the voting arena").strip()
     books = addBook(book, books)
 
     # Get the number of books, and thus number of categories
@@ -37,18 +37,29 @@ def main():
 
     # Voting form
     with st.form('Voting Page'):
+        # Instructions
+        st.write('## Instructions:')
+        st.write('1) Rank your preference of each book. 1 is the most preferred choice, 2 is the second...')
+        st.write('2) If you do not want to vote for a book, give it a Rank value of 0 (the default).')
+        st.write('3) You cannot give the same Ranking to multiple books. All Ranks must be unique or 0.')
+        st.write('4) Please only vote once!')
+        
         # Display the current list of books
         for book in books:
+            # Insert a line separator
+            st.markdown('---')
+
             col1, col2, col3 = st.columns(3)
             
             # Display the book we're voting on
             with col1:
-                st.write(book)
+                st.write(f'### {book}')
 
             # Voting categories
             with col2:
                 currentVote[book] = st.number_input(f'{book} Rank', min_value = 0, max_value = n_books)
 
+        st.markdown('---')
         vote = st.form_submit_button("Submit Vote!")
 
     # Check the vote meets our criteria
@@ -64,12 +75,14 @@ def main():
 
         # If all is good, update the vote status
         st.session_state['voted'] = True
-        st.write("User Vote")
+        st.write("## Your Vote:")
         st.write(currentVote)
         votes.append(currentVote)
 
     # Display the current number of votes
     st.write(f"# Number of Votes: {len(votes)}")
+    st.write('Use the "Refresh" button or refresh the page to see the results as they come in.')
+    st.write('NOTE: When you refresh the page, the vote you casted will no longer be displayed.')
 
     # Convert the votes to a dataframe
     data = {
