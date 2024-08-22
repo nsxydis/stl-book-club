@@ -10,6 +10,21 @@ def main():
     # Init books
     books, votes = init()
 
+    col1, col2 = st.columns(2)
+
+    with col1:
+        # Refresh button
+        refresh = st.button('Refresh Page')
+        if refresh:
+            st.rerun()
+
+    with col2:
+        clear = st.button("Reset Books & Votes")
+        if clear:
+            # Clear cache
+            st.cache_resource.clear()
+            st.rerun()
+
     # Add a book -- removing whitespace
     book = st.text_input("Add book").strip()
     books = addBook(book, books)
