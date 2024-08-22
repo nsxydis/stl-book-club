@@ -53,20 +53,20 @@ def main():
             books.append(book)
             st.success(f"Added book: {book}")
 
-    # Set the value of the remove book if there was input data
-    if 'remove' in st.session_state:
-        remove = st.session_state['remove'].strip()
-        st.session_state['remove'] = ''
-    else:
-        remove = ''
+    # Sort the books, because we're not heathens
+    books.sort()
     
     # Remove a book -- removing whitespace
-    st.text_input("Remove a book from the voting arena", key = 'remove')
-    if remove:
-        # Remove the book if it's in our data
+    with st.form("remove book"):
+        remove = st.selectbox('Remove a book from the voting arena', options = books)
+        removeBook = st.form_submit_button("Remove Book")
+    
+    # If we submitted a book to be removed, remove it
+    if removeBook:
         if remove in books:
+            st.warning(f'Removing book: {remove}')
             books.remove(remove)
-            st.warning(f"Removed book: {remove}")
+            st.rerun()
     
     # Debug: Check the current books list and what's been added or removed
     if st.session_state['debug']:
