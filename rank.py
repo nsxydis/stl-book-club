@@ -5,6 +5,7 @@ Purpose: Simple voting app to implement ranked choice voting.
 import streamlit as st
 import polars as pl
 import altair as alt
+import dashboardHelper as dh
 
 def main():
     # Defaults
@@ -16,7 +17,9 @@ def main():
         st.write(st.session_state)
     
     # Init books
-    books, votes = init()
+    books = st.session_state['books']
+    votes = st.session_state['votes']
+    details = st.session_state['details']
 
     col1, col2 = st.columns(2)
 
@@ -41,6 +44,12 @@ def main():
         if 'yes' in st.session_state and st.session_state['yes'] == True:
             # Clear cache
             st.cache_resource.clear()
+
+            # Reset the session state
+            for key in st.session_state.keys():
+                del st.session_state[key]
+
+            # Refresh the page
             st.rerun()
 
     # Set the value of book equal to the input data
@@ -100,14 +109,51 @@ def main():
             # Insert a line separator
             st.markdown('---')
 
-            col1, col2, col3 = st.columns(3)
+            col1, col2, col3 = st.columns(3, vertical_alignment='center')
+
+            # Check if we have book details
+            image, author, pages, description = None, None, None, None
+            if book in details:
+                
+                # Get the image if there is one
+                if 'image' in details[book]:
+                    image = details[book]['image']
+                
+                # Get the author
+                author = details[book]['author']
+
+                # Get the page count
+                pageCount = details[book]['pages']
+
+                # Get the description
+                description = details[book]['description']
+            
             
             # Display the book we're voting on
             with col1:
                 st.write(f'### {book}')
 
-            # Voting categories
+                # Display the author if there is one
+                if author:
+                    st.write(f'By: {author}')
+                
+                # Display the image if there is one
+                if image:
+                    st.image(image)
+
+                # Display the page count
+                if pageCount:
+                    st.write(f"Pages: {pageCount}")
+
+            # If there is a description, display it
             with col2:
+                if description:
+                    st.write('#### Description:')
+                    with st.container(height = 300):
+                        st.write(description)
+
+            # Voting categories
+            with col3:
                 currentVote[book] = st.number_input(f'{book} Rank', min_value = 0, max_value = n_books)
 
         st.markdown('---')
@@ -205,7 +251,7 @@ def main():
     # Display the current number of votes
     st.write(f"# Number of Votes: {len(votes)}")
     st.write('Use the "Refresh" button or refresh the page to see the results as they come in.')
-    st.write('NOTE: When you refresh the page, the vote you casted will no longer be displayed.')
+    st.write('NOTE: When you refresh the page, your vote will not be displayed.')
 
     # Convert the votes to a dataframe
     data = {
@@ -236,12 +282,7 @@ def main():
     rankChoice(df)
 
 
-@st.cache_resource()
-def init():
-    '''Initializes global variables'''
-    books = []
-    votes = []
-    return books, votes
+
 
 ### Copied functions
 def rankChoice(df, round = 1, scale = None):
@@ -395,4 +436,5 @@ def string_to_int_custom(s):
     return num
 
 if __name__ == '__main__':
+    dh.initAll()
     main()
