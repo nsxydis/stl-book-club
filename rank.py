@@ -97,13 +97,7 @@ def main():
 
     # Voting form
     with st.form('Voting Page'):
-        # Instructions
-        st.write('## Instructions:')
-        st.write('1) Rank your preference of each book. 1 is the most preferred choice, 2 is the second...')
-        st.write('2) If you do not want to vote for a book, give it a Rank value of 0 (the default).')
-        st.write('3) You cannot give the same Ranking to multiple books. All Ranks must be unique or 0.')
-        st.write('4) Please only vote once!')
-        
+
         # Display the current list of books
         for book in books:
             # Insert a line separator

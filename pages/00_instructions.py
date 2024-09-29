@@ -8,7 +8,8 @@ import dashboardHelper as dh
 def main():
     st.title("How to use this dashboard")
 
-    st.write("# Adding a book")
+    # Adding a book instructions
+    st.write("# Add a book")
     text = '''If you would like to add a book to be voted on, you have a couple of options:
     
     1. You can manually enter the book title on the "Vote" page
@@ -26,14 +27,13 @@ Modify Book Details tab.
 
     # Voting information
     st.write('# Voting')
-    
-    # Instructions
     text = '''
     1. Rank your preference of each book. 1 is the most preferred choice, 2 is the second....
     2. If you do not want to vote for a book, give it a Rank value of 0 (the default).
     3. You cannot give the same Ranking to multiple books. All Ranks must be unique or 0.
     4. Please only vote once!
 '''    
+    st.write(text)
 
 if __name__ == '__main__' or True:
     dh.initAll()
