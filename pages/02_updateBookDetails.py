@@ -65,6 +65,6 @@ def submit():
         # Increment
         n += 1
 
-if __name__ == '__main__':
+if __name__ == '__main__' or True:
     dh.initAll()
     main()

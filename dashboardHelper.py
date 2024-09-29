@@ -9,7 +9,7 @@ def initAll():
     init('books', books)
     init('votes', votes)
     init('details', details)
-    pageNavigation()
+    # pageNavigation()
 
 def init(variable, value = None):
     '''Initializes something in the session state if it is not already there'''
@@ -28,10 +28,10 @@ def data():
 def pageNavigation():
     '''Define navigation for the application'''
     pages = [
-        st.Page('pages/00_instructions.py', title = 'Instructions', default = True),
         st.Page('rank.py', title = 'Vote'),
+        st.Page('pages/00_instructions.py', title = 'Instructions', default = True),
         st.Page('pages/01_addBookDetails.py', title = 'Add Book'),
-        st.Page('pages/02_updateBookDetails.py', title = 'Modify Book Details')
+        st.Page('pages/02_updateBookDetails.py', title = 'Modify Book')
     ]
     nav = st.navigation(pages)
     nav.run()

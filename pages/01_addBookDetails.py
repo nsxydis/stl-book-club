@@ -209,6 +209,6 @@ class bookSummary:
             st.write('### Description:')
             st.write(bookInfo['description'])
       
-if __name__ == '__main__':
+if __name__ == '__main__' or True:
     dh.initAll()
     main()

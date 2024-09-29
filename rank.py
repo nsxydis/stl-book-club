@@ -435,6 +435,6 @@ def string_to_int_custom(s):
         num = num * 100 + char_to_num[char]  # Use a base large enough to avoid collisions
     return num
 
-if __name__ == '__main__':
+if __name__ == '__main__' or True:
     dh.initAll()
     main()
