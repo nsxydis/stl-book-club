@@ -10,7 +10,7 @@ import dashboardHelper as dh
 
 # Key Import options
 try:
-    from key import apiKey, apiFile
+    from key import apiKey
 except:
     apiKey = st.secrets['apiKey']
     # json = str(st.secrets['json']).replace("'", '"')
