@@ -1,0 +1,23 @@
+[project]
+name = "stl-book-club"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Nick Xydis",email = "nsxydis@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "polars (>=1.27.1,<2.0.0)",
+    "streamlit (>=1.44.1,<2.0.0)",
+    "st-pages (>=1.0.1,<2.0.0)",
+    "pygsheets (>=2.0.6,<3.0.0)",
+]
+
+[tool.poetry]
+packages = [{include = "stl_book_club", from = "src"}]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
